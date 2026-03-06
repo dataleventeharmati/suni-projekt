@@ -1,0 +1,25 @@
+critical_columns:
+- TCH_RMA_NUMBER
+- TCH_SERIAL_NUMBER_IN
+- REPAIR_PLANT_ID
+- RMA_DATE
+- RECEIVED_DATE
+- REPAIR_START_DATE
+- REPAIR_END_DATE
+financial_columns:
+- LABOR_CHARGE
+- PARTS_CHARGE
+- INVOICE_AMOUNT
+date_columns:
+- RMA_DATE
+- RECEIVED_DATE
+- REPAIR_START_DATE
+- REPAIR_END_DATE
+- INVOICE_DATE
+primary_key:
+- TCH_RMA_NUMBER
+- TCH_SERIAL_NUMBER_IN
+dq_gate:
+  duplicate_primary_keys_max: 0
+  RMA_DATE_null_rate_max: 0.05
+  mode: fail
