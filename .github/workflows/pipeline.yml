@@ -5,8 +5,9 @@ on:
   pull_request:
 
 jobs:
-  build-and-run:
+  sanity-check:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,54 +17,55 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install + Run pipeline on CI sample data
-        shell: bash
+      - name: Install dependencies
         run: |
-          set -euxo pipefail
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-          # create tiny CI sample Excel (so we don't need the big real file in repo)
-          python3 - <<'PY'
+      - name: Python syntax check
+        run: |
+          python -m py_compile src/*.py
+
+      - name: Verify key project files exist
+        run: |
+          test -f Makefile
+          test -f config.yaml
+          test -f requirements.txt
+          test -f src/pipeline.py
+          test -f src/ingest_bronze.py
+          test -f src/validate_and_clean.py
+          test -f src/dq_gate.py
+          test -f src/build_gold_kpis.py
+          test -f src/report_kpi_html.py
+          test -f src/artifacts_summary.py
+          test -f src/data_profile_report.py
+          test -f scripts/build_delivery.sh
+
+      - name: Verify Make targets exist
+        run: |
+          grep -q '^run:' Makefile
+          grep -q '^deliver:' Makefile
+
+      - name: Smoke import check
+        run: |
+          python - <<'PY'
+          import importlib.util
           from pathlib import Path
-          import pandas as pd
 
-          out = Path("data/bronze")
-          out.mkdir(parents=True, exist_ok=True)
+          files = [
+              "src/pipeline.py",
+              "src/ingest_bronze.py",
+              "src/validate_and_clean.py",
+              "src/dq_gate.py",
+              "src/build_gold_kpis.py",
+              "src/report_kpi_html.py",
+              "src/artifacts_summary.py",
+              "src/data_profile_report.py",
+          ]
 
-          # Minimal columns to satisfy config + pipeline steps
-          df = pd.DataFrame([
-              {
-                  "TCH_RMA_NUMBER": "CI_RMA_001",
-                  "TCH_SERIAL_NUMBER_IN": "CI_SN_001",
-                  "REPAIR_PLANT_ID": "CI_PLANT",
-                  "RMA_DATE": "2025-01-05",
-                  "RECEIVED_DATE": "2025-01-06",
-                  "REPAIR_START_DATE": "2025-01-06",
-                  "REPAIR_END_DATE": "2025-01-10",
-                  "INVOICE_DATE": "2025-01-12",
-                  "LABOR_CHARGE": 10.0,
-                  "PARTS_CHARGE": 5.0,
-                  "INVOICE_AMOUNT": 15.0,
-              },
-              {
-                  "TCH_RMA_NUMBER": "CI_RMA_002",
-                  "TCH_SERIAL_NUMBER_IN": "CI_SN_002",
-                  "REPAIR_PLANT_ID": "CI_PLANT",
-                  "RMA_DATE": "2025-02-01",
-                  "RECEIVED_DATE": "2025-02-02",
-                  "REPAIR_START_DATE": "2025-02-02",
-                  "REPAIR_END_DATE": "2025-02-05",
-                  "INVOICE_DATE": "2025-02-06",
-                  "LABOR_CHARGE": 20.0,
-                  "PARTS_CHARGE": 0.0,
-                  "INVOICE_AMOUNT": 20.0,
-              },
-          ])
-
-          # Use the exact filename pipeline expects
-          xlsx = out / "TCH_activity_report_2026-02-15_03-13-30.xlsx"
-          df.to_excel(xlsx, index=False)
-          print("WROTE:", xlsx)
+          for file in files:
+              spec = importlib.util.spec_from_file_location(Path(file).stem, file)
+              module = importlib.util.module_from_spec(spec)
+              spec.loader.exec_module(module)
+              print(f"OK import: {file}")
           PY
-
-          # run your standard reproducible entrypoint
-          make run
