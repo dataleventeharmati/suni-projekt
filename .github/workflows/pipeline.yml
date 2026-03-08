@@ -1,0 +1,69 @@
+name: pipeline-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install + Run pipeline on CI sample data
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          # create tiny CI sample Excel (so we don't need the big real file in repo)
+          python3 - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          out = Path("data/bronze")
+          out.mkdir(parents=True, exist_ok=True)
+
+          # Minimal columns to satisfy config + pipeline steps
+          df = pd.DataFrame([
+              {
+                  "TCH_RMA_NUMBER": "CI_RMA_001",
+                  "TCH_SERIAL_NUMBER_IN": "CI_SN_001",
+                  "REPAIR_PLANT_ID": "CI_PLANT",
+                  "RMA_DATE": "2025-01-05",
+                  "RECEIVED_DATE": "2025-01-06",
+                  "REPAIR_START_DATE": "2025-01-06",
+                  "REPAIR_END_DATE": "2025-01-10",
+                  "INVOICE_DATE": "2025-01-12",
+                  "LABOR_CHARGE": 10.0,
+                  "PARTS_CHARGE": 5.0,
+                  "INVOICE_AMOUNT": 15.0,
+              },
+              {
+                  "TCH_RMA_NUMBER": "CI_RMA_002",
+                  "TCH_SERIAL_NUMBER_IN": "CI_SN_002",
+                  "REPAIR_PLANT_ID": "CI_PLANT",
+                  "RMA_DATE": "2025-02-01",
+                  "RECEIVED_DATE": "2025-02-02",
+                  "REPAIR_START_DATE": "2025-02-02",
+                  "REPAIR_END_DATE": "2025-02-05",
+                  "INVOICE_DATE": "2025-02-06",
+                  "LABOR_CHARGE": 20.0,
+                  "PARTS_CHARGE": 0.0,
+                  "INVOICE_AMOUNT": 20.0,
+              },
+          ])
+
+          # Use the exact filename pipeline expects
+          xlsx = out / "TCH_activity_report_2026-02-15_03-13-30.xlsx"
+          df.to_excel(xlsx, index=False)
+          print("WROTE:", xlsx)
+          PY
+
+          # run your standard reproducible entrypoint
+          make run
