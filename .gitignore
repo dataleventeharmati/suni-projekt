@@ -10,3 +10,7 @@ delivery/
 
 # System
 .DS_Store
+
+# local archive
+local_archive/
+tmp_logs/
