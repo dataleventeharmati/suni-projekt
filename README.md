@@ -1,133 +1,74 @@
 # Suni Data Pipeline
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Pipeline](https://img.shields.io/badge/data--pipeline-bronze%20%E2%86%92%20silver%20%E2%86%92%20gold-orange)
-![ETL](https://img.shields.io/badge/etl-python-green)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
-
 Production-style Data Engineering pipeline built in Python.
 
-This project demonstrates a small but realistic end-to-end data pipeline with validation, profiling, KPI aggregation and automated reporting.
-
-The goal is to show how a raw Excel dataset can be transformed into clean analytics outputs using reproducible pipeline steps.
+![Pipeline Architecture](docs/pipeline_architecture.png)
 
 ---
 
-# Architecture
+## Architecture
 
-flowchart LR
-    A[Excel Source] --> B[Bronze Ingest]
-    B --> C[Silver Clean & Validate]
-    C --> D[Data Profiling]
-    D --> E[Data Quality Gate]
-    E --> F[Gold KPI Mart]
-    F --> G[Reports]
-    G --> H[KPI CSV]
-    G --> I[HTML Report]
-    G --> J[Data Quality JSON]
-    F --> K[Delivery Package]
-
----
-
-# Pipeline Layers
-
-## Bronze
-Raw Excel ingestion.
-
-Output:
-- parquet raw dataset
-
-## Silver
-Data cleaning and normalization.
-
-Includes:
-- schema normalization
-- date parsing
-- duplicate removal
-- null validation
-
-## Data Profiling
-
-Automatic dataset overview report.
-
-Generated file:
-
-reports/data_profile.md
-
-Contains:
-
-- row / column counts
-- column types
-- null analysis
-
-## Data Quality Gate
-
-Validation rules applied before analytics.
-
-Examples:
-
-- duplicate primary keys
-- null thresholds
-- date parsing errors
-
-If validation fails the pipeline stops.
-
-## Gold Layer
-
-Aggregated analytics dataset.
-
-Example metrics:
-
-- monthly repair volume
-- repair turnaround time
-- invoice metrics
-
-Output:
-
-data/gold/kpi_monthly.parquet  
-data/gold/kpi_monthly.csv  
+Excel Source
+     ↓
+Bronze Layer
+     ↓
+Silver Clean & Validate
+     ↓
+Data Profiling
+     ↓
+Data Quality Gate
+     ↓
+Gold KPI Mart
+     ↓
+Reports
 
 ---
 
-# Reports Generated
+## Pipeline Layers
 
-reports/data_profile.md  
-reports/kpi_report.html  
-reports/data_quality.json  
-reports/artifacts_summary.txt  
+Bronze
+- Raw Excel ingestion
+- Stored as parquet
+
+Silver
+- Data cleaning
+- Validation
+- Schema normalization
+
+Data Quality Gate
+- Null rate validation
+- Duplicate detection
+
+Gold
+- Monthly KPI aggregation
+- Repair metrics
+- Invoice metrics
+
+Reports
+- KPI CSV
+- HTML report
+- Data quality summary
+- Data profiling report
 
 ---
 
-# Versioned Runs
-
-Each pipeline execution stores a snapshot of reports.
-
-Example:
-
-runs/2026-03-08_14-00-36/reports
-
----
-
-# Run Pipeline
-
-git clone https://github.com/dataleventeharmati/suni-projekt.git  
-cd suni-projekt  
+## Run Pipeline
 
 make run
 
 ---
 
-# Build Delivery Package
+## Build Delivery Package
 
 make deliver
 
-Output:
+Outputs
 
 DE_delivery_medior_v2.zip
 
 ---
 
-# Stack
+## Stack
 
 - Python
 - pandas
@@ -135,11 +76,3 @@ DE_delivery_medior_v2.zip
 - openpyxl
 - Makefile
 - GitHub Actions
-
----
-
-# Notes
-
-This repository intentionally does not include the original dataset.
-
-The pipeline structure and code are provided for demonstration purposes.
