@@ -1,5 +1,10 @@
 # Suni Data Pipeline
 
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Pipeline](https://img.shields.io/badge/data--pipeline-bronze%20%E2%86%92%20silver%20%E2%86%92%20gold-orange)
+![ETL](https://img.shields.io/badge/etl-python-green)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
 Production-style Data Engineering pipeline built in Python.
 
 This project demonstrates a small but realistic end-to-end data pipeline with validation, profiling, KPI aggregation and automated reporting.
@@ -29,6 +34,9 @@ flowchart LR
 ## Bronze
 Raw Excel ingestion.
 
+Output:
+- parquet raw dataset
+
 ## Silver
 Data cleaning and normalization.
 
@@ -39,20 +47,25 @@ Includes:
 - null validation
 
 ## Data Profiling
+
 Automatic dataset overview report.
 
 Generated file:
+
 reports/data_profile.md
 
 Contains:
+
 - row / column counts
-- column data types
+- column types
 - null analysis
 
 ## Data Quality Gate
+
 Validation rules applied before analytics.
 
 Examples:
+
 - duplicate primary keys
 - null thresholds
 - date parsing errors
@@ -60,16 +73,19 @@ Examples:
 If validation fails the pipeline stops.
 
 ## Gold Layer
+
 Aggregated analytics dataset.
 
 Example metrics:
+
 - monthly repair volume
 - repair turnaround time
 - invoice metrics
 
 Output:
-data/gold/kpi_monthly.parquet
-data/gold/kpi_monthly.csv
+
+data/gold/kpi_monthly.parquet  
+data/gold/kpi_monthly.csv  
 
 ---
 
@@ -84,7 +100,10 @@ reports/artifacts_summary.txt
 
 # Versioned Runs
 
+Each pipeline execution stores a snapshot of reports.
+
 Example:
+
 runs/2026-03-08_14-00-36/reports
 
 ---
@@ -103,6 +122,7 @@ make run
 make deliver
 
 Output:
+
 DE_delivery_medior_v2.zip
 
 ---
